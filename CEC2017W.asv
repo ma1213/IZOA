@@ -1,0 +1,36 @@
+clc
+clear
+close all
+%%
+nPop=50; % 种群数
+Runs = 30; 
+Max_iter=1000; % 最大迭代次数
+ZOA_Best=zeros(33,Runs);
+WOA_Best=zeros(33,Runs);
+PSO_Best=zeros(33,Runs);
+GoldSA_Best=zeros(33,Runs);
+TLBO_Best=zeros(33,Runs);
+IZOA_Best=zeros(33,Runs);
+dim = 10; % 可选 2, 10, 30, 50, 100
+excelFile = 'optimization_results.xlsx';
+%%  选择函数
+for funNum=[1 3:30]
+    [lb,ub,dim,fobj] = Get_Functions_cec2017(funNum,dim);
+    for r=1:1:Runs
+        [ZOA_Best(funNum,r),ZOA_Best_pos,ZOA_cg_curve]=ZOA(nPop,Max_iter,lb,ub,dim,fobj);
+        [WOA_Best(funNum,r),WOA_Best_pos,WOA_cg_curve]=WOA(nPop,Max_iter,lb,ub,dim,fobj);
+        [PSO_Best(funNum,r),PSO_Best_pos,PSO_cg_curve]=PSO(nPop,Max_iter,lb,ub,dim,fobj);
+        [GoldSA_Best(funNum,r),GoldSA_Best_pos,GoldSA_cg_curve]=GoldSA(nPop,Max_iter,lb,ub,dim,fobj);
+        [TLBO_Best(funNum,r),TLBO_Best_pos,TLBO_cg_curve]=TLBO(nPop,Max_iter,lb,ub,dim,fobj);
+        [IZOA_Best(funNum,r),IZOA_Best_pos,IZOA_cg_curve]=ZOA1(nPop,Max_iter,lb,ub,dim,fobj);
+    end
+    % 创建一个包含结果的表格，其中每一列对应一个优化算法的结果
+    results = table(ZOA_Best(funNum,:)', WOA_Best(funNum,:)', PSO_Best(funNum,:)', GoldSA_Best(funNum,:)', TLBO_Best(funNum,:)', IZOA_Best(funNum,:)', ...
+        'VariableNames', {'ZOA', 'WOA', 'PSO', 'GoldSA', 'TLBO', 'IZOA'});
+
+    % 创建一个工作表名称
+    sheetName = ['Function_', num2str(funNum)];
+
+    % 使用writetable将结果写入Excel文件
+    writetable(results, excelFile, 'Sheet', sheetName);
+end
